@@ -46,12 +46,12 @@ test("custom shares are validated and no local fake payment can be made", async 
   const link = await page.getByLabel("Invite link").inputValue();
   await page.goto(link);
   await expect(
-    page.getByRole("button", { name: /Preview payment of/ }),
+    page.getByRole("button", { name: /Test R.*with Stripe/ }),
   ).toBeEnabled();
   await expect(
     page.getByText("Your contribution", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/untracked request/)).toBeVisible();
+  await expect(page.getByText(/untracked request/i)).toBeVisible();
 });
 test("bank-linked cellphone invitations validate contacts and keep details out of links and storage", async ({
   page,
@@ -88,7 +88,7 @@ test("bank-linked cellphone invitations validate contacts and keep details out o
     "0821234567",
   );
   expect(
-    await page.evaluate(() => localStorage.getItem("splitease-draft-v2")),
+    await page.evaluate(async () => (await import("/src/lib/privateStorage.ts")).privateLocal.getItem("splitease-draft-v2")),
   ).not.toContain("0821234567");
 });
 test("scanner decodes real QR image and lets recipient review the request", async ({
@@ -112,7 +112,7 @@ test("scanner decodes real QR image and lets recipient review the request", asyn
     page.getByRole("heading", { name: "Hi You, here is your share." }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /Preview payment of/ }),
+    page.getByRole("button", { name: /Test R.*with Stripe/ }),
   ).toBeEnabled();
 });
 test("scanner does not follow external or executable QR content and handles camera denial", async ({

@@ -1,3 +1,6 @@
+import { assertPrivateScope, privateScope } from "../../lib/privateStorage";
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 import {
@@ -11,7 +14,6 @@ import {
 } from "./rooms";
 import { validateShop, type ShopState } from "../shops/shops.api";
 import {
-  todayInSouthAfrica,
   repaymentPlan,
   type PaymentChoice,
   type InstalmentCount,
@@ -19,7 +21,7 @@ import {
 const channels = new Map<string, RealtimeChannel>();
 const demoKey = "splitease-demo-rooms-v1";
 const localRead = (): Record<string, Room> =>
-  JSON.parse(localStorage.getItem(demoKey) || "{}");
+  JSON.parse(privateLocal.getItem(demoKey) || "{}");
 function notify(key: string) {
   const channel = new BroadcastChannel("splitease-local-rooms");
   channel.postMessage({ key });
@@ -47,7 +49,7 @@ function record(
 function save(room: Room) {
   const rooms = localRead();
   rooms[room.key] = room;
-  localStorage.setItem(demoKey, JSON.stringify(rooms));
+  privateLocal.setItem(demoKey, JSON.stringify(rooms));
   notify(room.key);
   return room;
 }
@@ -96,6 +98,7 @@ export function createGuidedRoom(): RoomRef {
   return ref;
 }
 export async function createLiveRoom(shop: ShopState): Promise<RoomRef> {
+  const scope = privateScope();
   const invalid = validateShop(shop);
   if (invalid) throw Error(invalid);
   if (!supabase) throw Error("Sign in to create a shared group.");
@@ -104,7 +107,8 @@ export async function createLiveRoom(shop: ShopState): Promise<RoomRef> {
   } = await supabase.auth.getUser();
   if (!user)
     throw Error("Sign in to create a group and share it with your people.");
-  const { data, error } = await supabase.rpc("create_group_room", {
+  assertPrivateScope(scope);
+  const { data, error } = await privateRpc("create_group_room", {
     p_title: shop.shopName,
     p_members: roomMembers(shop).map((m) => ({
       name: m.name,
@@ -114,6 +118,7 @@ export async function createLiveRoom(shop: ShopState): Promise<RoomRef> {
     })),
   });
   if (error) throw Error("We could not create your group. Please try again.");
+  assertPrivateScope(scope);
   const ref: RoomRef = { key: data.key, mode: "cloud" };
   rememberRoom(ref);
   return ref;
@@ -128,7 +133,8 @@ export async function readRoom(ref: RoomRef): Promise<Room> {
     return view(room, ref);
   }
   if (!supabase) throw Error("Supabase is not configured.");
-  const { data, error } = await supabase.rpc("read_group_room", {
+  if (!(await supabase.auth.getSession()).data.session) throw Error("Sign in to open this shared group.");
+  const { data, error } = await privateRpc("read_group_room", {
     p_room_token: ref.key,
     p_member_token: ref.seat || null,
   });
@@ -168,7 +174,7 @@ export async function updateRoom(
     const member = room.members.find((m) => m.id === memberId);
     if (!member?.seatToken)
       throw Error("Open your own participant link to change this share.");
-    const { data, error } = await supabase.rpc("update_group_member", {
+    const { error } = await privateRpc("update_group_member", {
       p_room_token: ref.key,
       p_member_token: member.seatToken,
       p_action: action,
@@ -229,7 +235,7 @@ export async function updateRoom(
 export async function completeRoom(ref: RoomRef) {
   if (ref.mode === "cloud") {
     if (!supabase) throw Error("Supabase is not configured.");
-    const { data, error } = await supabase.rpc("complete_group_room", {
+    const { data, error } = await privateRpc("complete_group_room", {
       p_room_token: ref.key,
     });
     if (error) throw Error(error.message);
@@ -326,7 +332,7 @@ export async function joinRoom(ref: RoomRef) {
   if (!ref.seat) return;
   if (ref.mode === "cloud") {
     if (!supabase) return;
-    const { error } = await supabase.rpc("join_group_room", {
+    const { error } = await privateRpc("join_group_room", {
       p_room_token: ref.key,
       p_member_token: ref.seat,
     });
@@ -349,4 +355,10 @@ export async function joinRoom(ref: RoomRef) {
     return;
   record(room, m.name, "joined", m.id);
   save(room);
+}
+
+export async function revokeRoomInvitation(ref: RoomRef, memberId: string) {
+  if (ref.mode !== "cloud") throw new Error("Only shared invitations can be revoked.");
+  const { error } = await privateRpc("revoke_group_invitation", { p_room_token: ref.key, p_member_id: memberId });
+  if (error) throw new Error("Could not revoke this invitation. Please try again.");
 }

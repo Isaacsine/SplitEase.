@@ -1,3 +1,4 @@
+import { privateScope } from "../../lib/privateStorage";
 import type { PaymentChoice, InstalmentCount } from "../payments/paymentPlans";
 import {
   createContext,
@@ -18,17 +19,19 @@ import {
   type ContactMethod,
 } from "./shops.api";
 function useStateValue() {
+  const scope = privateScope();
   const [initial] = useState(loadDraft);
   const [shop, setShop] = useState(initial.shop);
   const [error, setError] = useState("");
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
+    if (scope !== privateScope()) return;
     try {
       saveDraft(shop);
     } catch {
       setError("Draft storage is unavailable in this browser.");
     }
-  }, [shop]);
+  }, [shop, scope]);
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);

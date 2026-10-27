@@ -6,14 +6,17 @@
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "build": "tsc",
-    "start": "node --env-file-if-exists=.env dist/server.js"
+    "test:stripe": "node --import tsx --test test/stripe.test.ts",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "express": "^5.0.0"
+    "express": "^5.0.0",
+    "stripe": "^23.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
     "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
     "tsx": "^4.0.0",
     "typescript": "~5.8.3"
   }

@@ -13,9 +13,12 @@
     "typecheck": "npm run typecheck --workspace frontend",
     "test": "playwright test",
     "dev:backend": "npm run dev --workspace backend",
-    "build:backend": "npm run build --workspace backend"
+    "build:backend": "npm run build --workspace backend",
+    "check": "npm run build && npm run build:backend && npm test --workspace backend && npm run test:privacy && npm test",
+    "test:privacy": "node tests/privacy.sql.cjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.12",
     "@playwright/test": "^1.64.1",
     "prettier": "^3.9.10"
   }

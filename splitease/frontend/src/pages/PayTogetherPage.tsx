@@ -28,9 +28,6 @@ export function PayTogetherPage() {
                 <span className="section-number">01</span>
                 <h2>Expense details</h2>
               </div>
-              <p className="muted">
-                Give this split a name so everyone knows what it is for.
-              </p>
               <GroceryShopForm />
               <ParticipantList />
             </>
@@ -38,7 +35,7 @@ export function PayTogetherPage() {
             <>
               <h2>Your split is ready to share.</h2>
               <p className="muted">
-                Send each person their own payment request.
+                Choose a person. Share their link.
               </p>
               <ParticipantList />
               <div className="field">
@@ -57,8 +54,7 @@ export function PayTogetherPage() {
               </div>
               <ShareInvite key={person.id} shop={shop} person={person} />
               <p className="muted small">
-                Each link belongs to one person. Keep it with its intended
-                recipient.
+                Share each link privately.
               </p>
               <Button variant="ghost" onClick={edit}>
                 Back to edit split
@@ -86,12 +82,12 @@ export function PayTogetherPage() {
             </span>
             <span>
               <strong>Start with a receipt</strong>
-              <small>Upload, review and assign items</small>
+              <small>Scan, check, split.</small>
             </span>
             <span aria-hidden="true">&#8599;</span>
           </a>
           <p className="rail-note">
-            Your draft stays on this device until you share it.
+            Saved on this device.
           </p>
         </aside>
       </div>

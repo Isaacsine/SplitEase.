@@ -23,7 +23,7 @@ export function CheckoutSheet({
         <PaymentStatus />
       </div>
       <p className="muted">
-        Payment processing is not connected. No funds have been collected.
+        Open a participant invitation to use Stripe test checkout. Test results appear on the receipt page and do not update this split summary.
       </p>
     </Modal>
   );

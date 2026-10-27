@@ -86,8 +86,8 @@ export function ShareInvite({
       </div>
       <p className="muted small">
         {tracked
-          ? "This request is saved to your account and can be opened on another device."
-          : "This link shares the amount only. Sign in and create a tracked invitation to save it to your account."}
+          ? "Saved to your account."
+          : "Link ready. Sign in to save it."}
       </p>
       <div className="linkrow">
         <input aria-label="Invite link" readOnly value={url} />

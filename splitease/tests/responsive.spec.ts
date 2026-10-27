@@ -63,9 +63,7 @@ for (const size of sizes)
       .getByLabel("Name", { exact: true })
       .fill("Alexandra with a long participant name");
     await page.getByRole("button", { name: "Add person", exact: true }).click();
-    await page
-      .getByLabel("Alexandra with a long participant name payment choice")
-      .selectOption("instalments");
+    await expect(page.getByRole("option", { name: "Pay in instalments" })).toHaveCount(0);
     await fit(page);
     await page.getByRole("button", { name: "Your split" }).click();
     await fit(page);
@@ -77,15 +75,12 @@ for (const size of sizes)
     await fit(page);
     const link = await page.getByLabel("Invite link").inputValue();
     await page.goto(link);
-    await page
-      .getByRole("button", { name: "Pay in instalments", exact: true })
-      .click();
-    await page.getByLabel("Repayment plan").selectOption("4");
+    await expect(page.getByRole("button", { name: /Test R.*with Stripe/ })).toBeVisible();
     await fit(page);
-    await expect(page.getByRole("table")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Preview payment|Pay from wallet/ })).toHaveCount(0);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({
-      path: "test-results/responsive/" + size.name + "-instalments.png",
+      path: "test-results/responsive/" + size.name + "-test-checkout.png",
       fullPage: true,
     });
     if (

@@ -1,3 +1,6 @@
+import { assertPrivateScope, privateScope } from "../../lib/privateStorage";
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import { todayInSouthAfrica } from "../payments/paymentPlans";
 import { supabase } from "../../lib/supabase";
 import {
@@ -21,11 +24,11 @@ type Stored = Plan & {
 };
 const storage = "splitease-monthly-plans";
 const all = (): Record<string, Stored> =>
-  JSON.parse(localStorage.getItem(storage) || "{}");
+  JSON.parse(privateLocal.getItem(storage) || "{}");
 function write(p: Stored) {
   const db = all();
   db[p.key] = p;
-  localStorage.setItem(storage, JSON.stringify(db));
+  privateLocal.setItem(storage, JSON.stringify(db));
   const c = new BroadcastChannel("splitease-plans");
   c.postMessage(p.key);
   c.close();
@@ -120,6 +123,7 @@ export async function createPlan(
   d: PlanDraft,
   mode: PlanRef["mode"],
 ): Promise<PlanRef> {
+  const scope = privateScope();
   validateDraft(d);
   let ref: PlanRef;
   if (mode === "local") {
@@ -172,13 +176,15 @@ export async function createPlan(
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw Error("Sign in to share a plan across devices.");
-    const { data, error } = await supabase.rpc("plan_create", { p_draft: d });
+    assertPrivateScope(scope);
+    const { data, error } = await privateRpc("plan_create", { p_draft: d });
     if (error)
       throw Error(
         "Could not create this plan. Check that monthly plans are enabled and try again.",
       );
     ref = { key: data.key, mode };
   }
+  assertPrivateScope(scope);
   rememberPlan(ref);
   return ref;
 }
@@ -194,12 +200,13 @@ export async function readPlan(r: PlanRef): Promise<Plan> {
     if (JSON.stringify([p.periods, p.rotation]) !== before) {
       const db = all();
       db[p.key] = p;
-      localStorage.setItem(storage, JSON.stringify(db));
+      privateLocal.setItem(storage, JSON.stringify(db));
     }
     return view(p, r);
   }
   if (!supabase) throw Error("Shared plans are not connected.");
-  const { data, error } = await supabase.rpc("plan_read", {
+  if (!(await supabase.auth.getSession()).data.session) throw Error("Sign in to open this shared plan.");
+  const { data, error } = await privateRpc("plan_read", {
     p_token: r.key,
     p_seat: r.seat || null,
   });
@@ -218,7 +225,7 @@ export async function changePlan(
 ): Promise<Plan> {
   if (r.mode === "cloud") {
     if (!supabase) throw Error("Shared plans are not connected.");
-    const { data: next, error } = await supabase.rpc("plan_action", {
+    const { data: next, error } = await privateRpc("plan_action", {
       p_token: r.key,
       p_seat: r.seat || null,
       p_action: action,
@@ -287,7 +294,7 @@ export async function changePlan(
     const payout = p.rotation?.payouts.find((x) => x.month === data.month);
     if (!me || payout?.recipient !== me.id)
       throw Error(
-        "Only this month's recipient can acknowledge the simulated payout.",
+        "Only this month's recipient can acknowledge the payout record.",
       );
     payout.received = true;
   } else if (action === "propose") {
@@ -361,7 +368,7 @@ export async function listPlans(): Promise<{
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
-        const { data, error } = await supabase.rpc("plan_list");
+        const { data, error } = await privateRpc("plan_list");
         if (error)
           throw Error(
             "Shared plans could not be loaded. Check your connection and monthly-plan setup.",
@@ -413,4 +420,10 @@ export function subscribePlan(r: PlanRef, refresh: () => void) {
     window.removeEventListener("focus", refresh);
     window.removeEventListener("online", refresh);
   };
+}
+
+export async function revokePlanInvitation(ref: PlanRef, memberId: string) {
+ if (ref.mode !== "cloud") throw new Error("Only shared invitations can be revoked.");
+ const { error } = await privateRpc("revoke_plan_invitation", {p_token:ref.key,p_member_id:memberId});
+ if (error) throw new Error("Could not revoke this invitation. Please try again.");
 }

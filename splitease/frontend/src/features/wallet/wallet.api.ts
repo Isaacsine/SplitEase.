@@ -1,3 +1,5 @@
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import { supabase } from "../../lib/supabase";
 export type WalletMode = "local" | "cloud";
 export type WalletKind = "add" | "move" | "use";
@@ -18,13 +20,13 @@ const storage = "splitease-wallet-v1";
 export async function readWallet(mode: WalletMode): Promise<Wallet> {
   if (mode === "local")
     return (
-      JSON.parse(localStorage.getItem(storage) || "null") || {
+      JSON.parse(privateLocal.getItem(storage) || "null") || {
         balance: 0,
         entries: [],
       }
     );
   if (!supabase) throw Error("Sign in once account wallets are connected.");
-  const { data, error } = await supabase.rpc("wallet_read");
+  const { data, error } = await privateRpc("wallet_read");
   if (error)
     throw Error(
       "Your account wallet is unavailable. Sign in and check that wallets are enabled.",
@@ -49,7 +51,7 @@ export async function walletAction(
     throw Error("Enter a valid amount.");
   if (mode === "cloud") {
     if (!supabase) throw Error("Account wallets are not connected.");
-    const { data, error } = await supabase.rpc("wallet_action", {
+    const { data, error } = await privateRpc("wallet_action", {
       p_kind: kind,
       p_cents: cents,
       p_label: label,
@@ -88,7 +90,7 @@ export async function walletAction(
         ...wallet.entries,
       ],
     };
-    localStorage.setItem(storage, JSON.stringify(next));
+    privateLocal.setItem(storage, JSON.stringify(next));
     return next;
   };
   return navigator.locks

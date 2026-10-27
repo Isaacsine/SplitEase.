@@ -273,7 +273,7 @@ test("Supabase sign-in, tracked invitation reuse, activity open/retry, and sign-
     page.getByRole("heading", { name: "Hi Alex, here is your share." }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /Preview payment of/ }),
+    page.getByRole("button", { name: /Test R.*with Stripe/ }),
   ).toBeEnabled();
   await page.getByRole("link", { name: "Activity", exact: true }).click();
   state.failedList = true;
@@ -359,7 +359,7 @@ test("camera start, stop and navigation release the media stream (synthetic came
   try {
     const context = await browser.newContext({ permissions: ["camera"] });
     const page = await context.newPage();
-    await page.goto("http://127.0.0.1:5173/#scan");
+    await page.goto("http://127.0.0.1:5175/#scan");
     await page.getByRole("button", { name: "Start camera" }).click();
     await expect(
       page.getByRole("button", { name: "Stop camera" }),

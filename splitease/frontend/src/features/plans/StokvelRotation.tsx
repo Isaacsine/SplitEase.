@@ -68,8 +68,8 @@ export function StokvelRotation({
               <span className="pill">
                 {payout
                   ? payout.received
-                    ? "Acknowledged (preview)"
-                    : "Available (preview)"
+                    ? "Recorded"
+                    : "Ready to record"
                   : "Scheduled"}
               </span>
               {payout && member.isMe && !payout.received && (
@@ -87,12 +87,7 @@ export function StokvelRotation({
         })}
       </ol>
       <p className="notice">
-        Automatic payout preview only. Once all contributions for a month are
-        confirmed and month-end arrives, opening the plan creates one simulated
-        payout for its scheduled recipient. Only they can acknowledge it. No
-        bank transfer occurs, no wallet is funded, and nothing runs in the
-        background. A future approved provider would handle automatic
-        collections and payouts.
+        Records only. Arrange payouts outside SplitEase.
       </p>
       {!p.active && me && (
         <details>

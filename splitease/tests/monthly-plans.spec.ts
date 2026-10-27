@@ -32,7 +32,7 @@ async function openAlex(page: Page, context: any) {
   ).toBeVisible();
   return guest as Page;
 }
-test("agreements, private debit preference, confirmation and independent monthly debt", async ({
+test("agreements, private reminder preferences, confirmation and independent monthly debt", async ({
   page,
   context,
 }) => {
@@ -62,12 +62,12 @@ test("agreements, private debit preference, confirmation and independent monthly
     page.getByRole("button", { name: "Start monthly plan" }),
   ).toBeEnabled();
   await page.getByRole("button", { name: "Start monthly plan" }).click();
-  await guest.getByLabel("How you want to pay").selectOption("debit_preview");
-  await expect(guest.getByText(/No debit order is created/)).toBeVisible();
+  await guest.getByLabel("How you want to pay").selectOption("manual");
+  await expect(guest.getByRole("option", { name: /Automatic debit/ })).toHaveCount(0);
   await guest.getByRole("button", { name: "Save preferences" }).click();
   await guest.reload();
   await expect(guest.getByLabel("How you want to pay")).toHaveValue(
-    "debit_preview",
+    "manual",
   );
   const privateData = await page.evaluate(async () => {
     const api = await import("/src/features/plans/plans.api.ts"),
@@ -80,6 +80,7 @@ test("agreements, private debit preference, confirmation and independent monthly
   await guest.clock.setFixedTime(new Date("2027-02-15T10:00:00Z"));
   await page.reload();
   await guest.reload();
+  await page.getByLabel("Month", { exact: true }).selectOption("2027-02");
   await guest.getByRole("button", { name: "I have paid for 2027-02" }).click();
   await expect(
     page.locator(".plan-period").filter({ hasText: "Alex" }),

@@ -1,3 +1,5 @@
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../../components/ui/Button";
 import { supabase } from "../../lib/supabase";
@@ -6,12 +8,12 @@ import type { PlanRef } from "./plans";
 
 type PlanMessage = { id: string; senderName: string; body: string; createdAt: string };
 const storageKey = "splitease-plan-chat-v1";
-function localRead(): Record<string, PlanMessage[]> { try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; } }
-function localWrite(value: Record<string, PlanMessage[]>) { localStorage.setItem(storageKey, JSON.stringify(value)); }
+function localRead(): Record<string, PlanMessage[]> { try { return JSON.parse(privateLocal.getItem(storageKey) || "{}"); } catch { return {}; } }
+function localWrite(value: Record<string, PlanMessage[]>) { privateLocal.setItem(storageKey, JSON.stringify(value)); }
 async function list(ref: PlanRef): Promise<PlanMessage[]> {
   if (ref.mode === "local") return localRead()[ref.key] || [];
   if (!supabase) throw Error("Supabase is not configured.");
-  const { data, error } = await supabase.rpc("read_plan_messages", { p_plan_token: ref.key, p_seat: ref.seat || null });
+  const { data, error } = await privateRpc("read_plan_messages", { p_plan_token: ref.key, p_seat: ref.seat || null });
   if (error) throw Error("Could not load plan chat. Apply the plan-chat migration first.");
   return (data || []) as PlanMessage[];
 }
@@ -20,7 +22,7 @@ async function send(ref: PlanRef, body: string) {
   if (!text || text.length > 1000) throw Error("Message must be between 1 and 1000 characters.");
   if (ref.mode === "local") { const db = localRead(), messages = db[ref.key] || []; messages.push({ id: crypto.randomUUID(), senderName: plan.members.find((member) => member.isMe)?.name || "Organiser", body: text, createdAt: new Date().toISOString() }); db[ref.key] = messages.slice(-100); localWrite(db); return db[ref.key]; }
   if (!supabase) throw Error("Supabase is not configured.");
-  const { error } = await supabase.rpc("add_plan_message", { p_plan_token: ref.key, p_seat: ref.seat || null, p_body: text });
+  const { error } = await privateRpc("add_plan_message", { p_plan_token: ref.key, p_seat: ref.seat || null, p_body: text });
   if (error) throw Error(error.message || "Could not send this message.");
   return list(ref);
 }

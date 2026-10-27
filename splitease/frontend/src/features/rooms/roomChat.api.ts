@@ -1,16 +1,18 @@
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import { supabase } from "../../lib/supabase";
 import { readRoom } from "./rooms.api";
 import type { RoomRef } from "./rooms";
 
 export type RoomMessage = { id: string; senderName: string; body: string; createdAt: string };
 const storageKey = "splitease-room-chat-v1";
-function readLocal(): Record<string, RoomMessage[]> { try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; } }
-function saveLocal(messages: Record<string, RoomMessage[]>) { localStorage.setItem(storageKey, JSON.stringify(messages)); }
+function readLocal(): Record<string, RoomMessage[]> { try { return JSON.parse(privateLocal.getItem(storageKey) || "{}"); } catch { return {}; } }
+function saveLocal(messages: Record<string, RoomMessage[]>) { privateLocal.setItem(storageKey, JSON.stringify(messages)); }
 
 export async function listRoomMessages(ref: RoomRef): Promise<RoomMessage[]> {
   if (ref.mode === "demo") return readLocal()[ref.key] || [];
   if (!supabase) throw Error("Supabase is not configured.");
-  const { data, error } = await supabase.rpc("read_group_room_messages", { p_room_token: ref.key, p_member_token: ref.seat || null });
+  const { data, error } = await privateRpc("read_group_room_messages", { p_room_token: ref.key, p_member_token: ref.seat || null });
   if (error) throw Error("Could not load group chat. Apply the chat migration first.");
   return (data || []) as RoomMessage[];
 }
@@ -28,7 +30,7 @@ export async function sendRoomMessage(ref: RoomRef, body: string): Promise<RoomM
     return messages[ref.key];
   }
   if (!supabase) throw Error("Supabase is not configured.");
-  const { error } = await supabase.rpc("add_group_room_message", { p_room_token: ref.key, p_member_token: ref.seat || null, p_body: text });
+  const { error } = await privateRpc("add_group_room_message", { p_room_token: ref.key, p_member_token: ref.seat || null, p_body: text });
   if (error) throw Error(error.message || "Could not send this message.");
   return listRoomMessages(ref);
 }

@@ -1,8 +1,3 @@
-import {
-  paymentLabels,
-  type PaymentChoice,
-  type InstalmentCount,
-} from "../../features/payments/paymentPlans";
 import { useState } from "react";
 import { useShop } from "../../features/shops/useShop";
 import type { ContactMethod } from "../../features/shops/shops.api";
@@ -18,7 +13,6 @@ export function ParticipantList() {
     addParticipant,
     updateShare,
     updatePercentage,
-    setPaymentChoice,
   } = useShop();
   const [open, setOpen] = useState(false),
     [name, setName] = useState(""),
@@ -100,45 +94,7 @@ export function ParticipantList() {
           ) : (
             <strong className="share">{formatZAR(p.share)}</strong>
           )}
-          <div className="person-payment">
-            <label htmlFor={"payment-choice-" + p.id}>Payment choice</label>
-            <select
-              id={"payment-choice-" + p.id}
-              aria-label={p.name + " payment choice"}
-              value={p.paymentChoice || "now"}
-              disabled={!setup}
-              onChange={(e) =>
-                setPaymentChoice(
-                  p.id,
-                  e.target.value as PaymentChoice,
-                  p.instalmentCount || 3,
-                )
-              }
-            >
-              {Object.entries(paymentLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-            {p.paymentChoice === "instalments" && (
-              <select
-                aria-label={p.name + " number of instalments"}
-                value={p.instalmentCount || 3}
-                disabled={!setup}
-                onChange={(e) =>
-                  setPaymentChoice(
-                    p.id,
-                    "instalments",
-                    Number(e.target.value) as InstalmentCount,
-                  )
-                }
-              >
-                <option value={3}>3 monthly payments</option>
-                <option value={4}>4 monthly payments</option>
-              </select>
-            )}
-          </div>
+          <small className="person-payment muted">Pay now · Stripe test checkout</small>
           {setup && !p.isOrganizer && (
             <button
               className="remove"
@@ -157,8 +113,7 @@ export function ParticipantList() {
       )}
       <Modal open={open} onClose={() => setOpen(false)} title="Add a person">
         <p className="muted">
-          Use a bank-linked cellphone number, an email, or a payment invite
-          link.
+          Choose how to invite them.
         </p>
         <form
           onSubmit={(e) => {

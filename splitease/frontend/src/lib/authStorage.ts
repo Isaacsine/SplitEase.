@@ -38,9 +38,9 @@ export const authStorage = {
   removeItem(key: string) {
     seen.add(key);
     memory.delete(key);
-    for (const store of [localStorage, sessionStorage])
+    for (const getStore of [() => localStorage, () => sessionStorage])
       try {
-        store.removeItem(key);
+        getStore().removeItem(key);
       } catch {}
   },
 };

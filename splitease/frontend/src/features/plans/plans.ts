@@ -1,3 +1,4 @@
+import { privateSession } from "../../lib/privateStorage";
 import { todayInSouthAfrica } from "../payments/paymentPlans";
 export interface PlanRef {
   key: string;
@@ -160,7 +161,7 @@ export function parsePlan(hash: string): PlanRef | null {
 export function rememberPlan(r: PlanRef) {
   try {
     const refs = planRefs().filter((x) => x.key !== r.key);
-    sessionStorage.setItem(
+    privateSession.setItem(
       "splitease-plan-refs",
       JSON.stringify([r, ...refs].slice(0, 50)),
     );
@@ -168,7 +169,7 @@ export function rememberPlan(r: PlanRef) {
 }
 export function planRefs(): PlanRef[] {
   try {
-    return JSON.parse(sessionStorage.getItem("splitease-plan-refs") || "[]");
+    return JSON.parse(privateSession.getItem("splitease-plan-refs") || "[]");
   } catch {
     return [];
   }

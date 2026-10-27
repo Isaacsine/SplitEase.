@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import {
   roomRefs,
   roomLink,
-  roomCoverage,
-  memberBalance,
   type Room,
   type RoomRef,
 } from "../features/rooms/rooms";
 import { ownedRoomRefs, readRoom } from "../features/rooms/rooms.api";
-import { formatZAR } from "../lib/money";
-import { displayDate } from "../features/payments/paymentPlans";
 import { Button } from "../components/ui/Button";
 export function BalancesPage() {
   const [entries, setEntries] = useState<{ room: Room; ref: RoomRef }[]>([]),
@@ -51,33 +47,6 @@ export function BalancesPage() {
       active = false;
     };
   }, [version]);
-  let contributions = 0,
-    remaining = 0,
-    completed = 0;
-  const upcoming: {
-    title: string;
-    amount: number;
-    due: string;
-    url: string;
-  }[] = [];
-  for (const { room, ref } of entries) {
-    const mine = room.members.find((m) => m.isMe);
-    if (!mine) continue;
-    if (["covered", "credit_funded"].includes(mine.state))
-      contributions += mine.shareCents;
-    if (room.completed) completed++;
-    const balance = memberBalance(mine, room.createdAt.slice(0, 10));
-    remaining += balance.remaining;
-    if (mine.state === "credit_funded")
-      for (const p of balance.plan.slice(mine.repaid))
-        upcoming.push({
-          title: room.title,
-          amount: p.amount,
-          due: p.due,
-          url: roomLink(ref),
-        });
-  }
-  upcoming.sort((a, b) => a.due.localeCompare(b.due));
   return (
     <section className="panel">
       <div className="rowtitle">
@@ -93,48 +62,12 @@ export function BalancesPage() {
           Refresh balances
         </Button>
       </div>
-      <p className="muted">
-        Your contributions and upcoming repayments, all in one place. Amounts
-        are simulated.
-      </p>
-      <div className="credit-stats">
-        <div>
-          <small>Contributions</small>
-          <strong>{formatZAR(contributions / 100)}</strong>
-        </div>
-        <div>
-          <small>Repayments remaining</small>
-          <strong data-testid="dashboard-credit">
-            {formatZAR(remaining / 100)}
-          </strong>
-        </div>
-        <div>
-          <small>Completed splits</small>
-          <strong>{completed}</strong>
-        </div>
-      </div>
+      <p className="muted">Your groups, together. Stripe test results are shown on receipts.</p>
       {busy && <p role="status">Loading balances...</p>}
       {errors.length > 0 && (
         <p className="error" role="alert">
           Some rooms could not be loaded: {errors.join(" ")}
         </p>
-      )}
-      <h3>Upcoming repayments</h3>
-      {upcoming.length ? (
-        upcoming.map((p, i) => (
-          <div className="funding-person" key={i}>
-            <div>
-              <strong>{p.title}</strong>
-              <small>{displayDate(p.due)}</small>
-            </div>
-            <strong>{formatZAR(p.amount)}</strong>
-            <a className="button secondary" href={p.url}>
-              View plan
-            </a>
-          </div>
-        ))
-      ) : (
-        <p className="notice">You have no upcoming repayments.</p>
       )}
       <h3>Your groups</h3>
       {entries.length
@@ -144,11 +77,11 @@ export function BalancesPage() {
                 <strong>{room.title}</strong>
                 <small>
                   {room.mode === "demo" ? "On this device" : "Shared group"} -{" "}
-                  {roomCoverage(room).percent}% covered (simulation)
+                  Saved group
                 </small>
               </div>
               <span className="pill">
-                {room.completed ? "Completed" : "In progress"}
+                Test payments
               </span>
               <a className="button secondary" href={roomLink(ref)}>
                 View group

@@ -7,7 +7,6 @@ import {
 import { formatZAR } from "../lib/money";
 import { PaymentCheckout } from "../features/payments/PaymentCheckout";
 import { Button } from "../components/ui/Button";
-import { useShop } from "../features/shops/useShop";
 export function JoinShopPage({
   hash,
   landing = false,
@@ -15,7 +14,6 @@ export function JoinShopPage({
   hash: string;
   landing?: boolean;
 }) {
-  const { reset } = useShop();
   const [data, setData] = useState<Invite | null>(() =>
       hash.startsWith("#join=") ? parseInvite(hash) : null,
     ),
@@ -64,17 +62,14 @@ export function JoinShopPage({
       </p>
       {!data.verified && (
         <div className="notice">
-          This is an untracked request. Its details are supplied in the link and
-          have not been verified. Confirm the amount and recipient directly with
-          the sender.
+          Untracked request. Check the amount with the sender.
         </div>
       )}
       {landing && !accepted ? (
         <div className="notice invite-landing">
           <strong>Would you like to accept this invitation?</strong>
           <p>
-            You can continue from this browser without installing SplitEase.
-            Sign in if you want the invitation saved to your account.
+            No app download needed. Sign in to save this invitation.
           </p>
           <div className="actions">
             <Button onClick={() => setAccepted(true)}>Accept invitation</Button>
@@ -96,17 +91,10 @@ export function JoinShopPage({
           </div>
         </div>
       ) : (
-        <PaymentCheckout
-          token={data.verified ? hash.slice(8) : null}
-          share={data.share}
-          preferredChoice={data.paymentChoice}
-          preferredCount={data.instalmentCount}
-          onComplete={reset}
-        />
+        <PaymentCheckout share={data.share} />
       )}
       <p className="muted small">
-        Payment previews are for exploring the app only. No banking or card
-        details are required.
+        Test cards only. Need help? Open Help below.
       </p>
       <a className="button ghost" href="#pay">
         Create your own split

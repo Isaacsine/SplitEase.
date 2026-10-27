@@ -18,8 +18,7 @@ export function inviteLink(shop: ShopState, p: Participant) {
     totalAmount: shop.totalAmount,
     name: p.name,
     share: p.share,
-    paymentChoice: p.paymentChoice || "now",
-    instalmentCount: p.instalmentCount || 3,
+    paymentChoice: "now",
   };
   return (
     location.origin +
@@ -63,13 +62,7 @@ export function parseInvite(hash: string): Invite | null {
   }
 }
 function withPreference(url: string, p: Participant) {
-  return (
-    url +
-    "&choice=" +
-    (p.paymentChoice || "now") +
-    "&count=" +
-    (p.instalmentCount || 3)
-  );
+  return url + "&choice=" + "now" + "&count=" + (p.instalmentCount || 3);
 }
 export async function publishInvite(
   shop: ShopState,
@@ -130,7 +123,7 @@ export async function readInvite(rawToken: string): Promise<Invite> {
     throw Error("This invitation requires a connected Supabase project.");
   if (!/^[0-9a-f-]{36}$/i.test(token))
     throw Error("This invitation is invalid.");
-  const { data, error } = await supabase.rpc("read_payment_request", {
+  const { data, error } = await supabase!.rpc("read_payment_request", {
     request_token: token,
   });
   if (error || !data?.length)
@@ -161,6 +154,7 @@ export async function listRequests() {
   const { data, error } = await supabase
     .from("payment_requests")
     .select("id,token,title,recipient_name,amount_cents,created_at,expires_at")
+    .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
   if (error) throw Error("Could not load payment requests.");
   return data || [];

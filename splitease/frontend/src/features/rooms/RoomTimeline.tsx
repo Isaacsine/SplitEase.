@@ -25,36 +25,36 @@ function describe(event: RoomEvent, room: Room) {
             " declared cash for " +
             name +
             "; awaiting organiser confirmation."
-        : event.actor + " previewed paying now for " + name + " (simulation).";
+        : event.actor + " added a test payment for " + name + " (test record).";
     case "cash":
-      return "Organiser confirmed cash from " + name + " (simulation).";
+      return "Organiser confirmed cash from " + name + " (test record).";
     case "credit":
       return (
-        event.actor + " previewed credit funding for " + name + " (simulation)."
+        event.actor + " added a test funding record for " + name + " (test record)."
       );
     case "repay":
       return (
-        event.actor + " previewed a repayment for " + name + " (simulation)."
+        event.actor + " added a test repayment record for " + name + " (test record)."
       );
     case "decline":
       return (
         event.actor +
         " declined the contribution for " +
         name +
-        " (simulation)."
+        " (test record)."
       );
     case "reset":
-      return event.actor + " reset " + name + "'s preview.";
+      return event.actor + " reset " + name + "'s test record.";
     case "completed":
-      return "Organiser completed the split (simulation).";
+      return "Organiser completed the split (test record).";
   }
 }
 export function nextStep(m: RoomMember, room: Room) {
   if (m.state === "cash_declared")
     return room.owner
-      ? "Confirm cash receipt after receiving it (simulation)."
+      ? "Confirm cash receipt after receiving it (test record)."
       : "Waiting for cash confirmation from the organiser.";
-  if (m.state === "covered") return "This share is covered in simulation.";
+  if (m.state === "covered") return "This share is covered in test records.";
   if (m.state === "credit_funded") {
     const b = memberBalance(m, room.createdAt.slice(0, 10)),
       next = b.plan[m.repaid];
@@ -63,18 +63,18 @@ export function nextStep(m: RoomMember, room: Room) {
           formatZAR(next.amount) +
           " on " +
           displayDate(next.due) +
-          " (simulation)."
+          " (test record)."
       : next
-        ? "Share covered; repayment preview remains available in the personal view."
-        : "Share covered; all repayments previewed.";
+        ? "Share covered; repayment record remains available in the personal view."
+        : "Share covered; all repayment records complete.";
   }
   if (m.state === "declined")
-    return "Choose another payment method or retry your simulated contribution.";
+    return "Choose another payment method or retry your test checkout.";
   return m.choice === "cash"
     ? "Declare the cash contribution, then wait for organiser confirmation."
     : m.choice === "instalments"
-      ? "Review the illustrative plan, then preview credit funding."
-      : "Choose your payment method, then preview your contribution.";
+      ? "Review the illustrative plan, then view test checkout."
+      : "Choose your payment method, then open test checkout.";
 }
 export function RoomTimeline({ room }: { room: Room }) {
   return (
@@ -90,7 +90,7 @@ export function RoomTimeline({ room }: { room: Room }) {
         </p>
       )}
       <ol>
-        {(room.events || []).map((e) => (
+        {(room.events || []).filter(event => ["created", "joined"].includes(event.action)).map((e) => (
           <li key={e.id}>
             <p>{describe(e, room)}</p>
             <time dateTime={e.createdAt}>

@@ -1,3 +1,3 @@
 export function PaymentStatus() {
-  return <span className="pill">Not paid</span>;
+  return <span className="pill">Not tracked here</span>;
 }

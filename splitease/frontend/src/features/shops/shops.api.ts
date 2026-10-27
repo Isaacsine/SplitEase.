@@ -1,3 +1,4 @@
+import { privateLocal, isAdoptedDraft } from "../../lib/privateStorage";
 import type { PaymentChoice, InstalmentCount } from "../payments/paymentPlans";
 export type SplitMethod = "equally" | "amount" | "percentage";
 export type Stage = "setup" | "authorise" | "checkout" | "paid";
@@ -141,7 +142,7 @@ export function validateShop(shop: ShopState) {
 const key = "splitease-draft-v2";
 export function loadDraft(): { shop: ShopState; history: Receipt[] } {
   try {
-    const data = JSON.parse(localStorage.getItem(key) || "null");
+    const data = JSON.parse(privateLocal.getItem(key) || "null");
     if (
       data?.shop &&
       typeof data.shop.shopName === "string" &&
@@ -155,7 +156,7 @@ export function loadDraft(): { shop: ShopState; history: Receipt[] } {
           Number.isFinite(p.share),
       )
     )
-      return { shop: { ...data.shop, stage: "setup" }, history: [] };
+      return { shop: { ...data.shop, stage: isAdoptedDraft() && data.shop.stage === "authorise" ? "authorise" : "setup" }, history: [] };
   } catch {}
   return { shop: newShop(), history: [] };
 }
@@ -164,5 +165,5 @@ export function saveDraft(shop: ShopState) {
     ...shop,
     participants: shop.participants.map(({ contact, ...p }) => p),
   };
-  localStorage.setItem(key, JSON.stringify({ shop: safe }));
+  privateLocal.setItem(key, JSON.stringify({ shop: safe }));
 }

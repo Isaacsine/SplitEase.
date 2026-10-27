@@ -1,4 +1,3 @@
-import { WalletPayment } from "../features/wallet/WalletPayment";
 import { StokvelRotation } from "../features/plans/StokvelRotation";
 import { PlanChat } from "../features/plans/PlanChat";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -36,12 +35,12 @@ function Preferences({
   disabled: boolean;
   save: (data: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const [method, setMethod] = useState(m.method || "manual"),
+  const [method, setMethod] = useState("manual" as PlanMember["method"]),
     [reminders, setReminders] = useState(m.reminders ?? true),
     [days, setDays] = useState(m.days ?? 3),
     [message, setMessage] = useState("");
   useEffect(() => {
-    setMethod(m.method || "manual");
+    setMethod("manual" as PlanMember["method"]);
     setReminders(m.reminders ?? true);
     setDays(m.days ?? 3);
   }, [m.method, m.reminders, m.days]);
@@ -73,17 +72,8 @@ function Preferences({
           onChange={(e) => setMethod(e.target.value as typeof method)}
         >
           <option value="manual">Manual payment</option>
-          <option value="debit_preview">Automatic debit - preview only</option>
         </select>
       </label>
-      {method === "debit_preview" && (
-        <p className="notice">
-          This records your preference only. No debit order is created, no
-          mandate is signed and nothing is deducted. An approved provider and
-          your separate authorisation would be required. Continue paying
-          manually.
-        </p>
-      )}
       <label className="assignment-choice">
         <input
           type="checkbox"
@@ -451,15 +441,6 @@ export function PlanPage({ hash }: { hash: string }) {
                             ? "Overdue"
                             : "Due"}
                     </span>
-                    {member.isMe && x.status === "due" && ref && (
-                      <WalletPayment
-                        target={{ kind: "plan", ref, item: x.id }}
-                        cents={x.cents}
-                        disabled={disabled}
-                        onPaid={refresh}
-                        onBank={() => act("declare", undefined, x.id)}
-                      />
-                    )}
                     {member.isMe && x.status === "due" && (
                       <Button
                         variant="secondary"

@@ -66,3 +66,15 @@ Deposits need only an amount. Wallet balances can fund bills, live room shares, 
 ## Google and phone sign-in
 
 Google sign-in and phone-only passkey sign-in are available through Supabase Auth. Enable the providers and configure the callback URL and passkey relying party before testing live. See [sign-in setup](docs/sign-in.md).
+
+## Stripe sandbox
+
+Optional Stripe-hosted test checkout is available on invitation Pay now shares. It is disabled by default and rejects live keys. Follow [Stripe sandbox setup](docs/stripe-sandbox.md) for exact backend/frontend settings, CLI webhook forwarding and test cards. No database migration is needed; sandbox payments never fund the prototype wallet or mark group contributions paid.
+
+## Current payment experience
+
+Pay now uses Stripe test checkout. Wallet and credit controls are hidden, and old wallet links show an unavailable notice. Checkout never falls back to a simulated success. Test results still do not reconcile group balances. See [test payment rollout](docs/test-payment-rollout.md) for scope and retained legacy tests.
+
+## Final UI and review checks
+
+Help contains the user guide and support contacts. Phones use bottom navigation. Run `npm run check` for builds and automated review checks; see [review notes](docs/review-notes.md) for scope, validation and current payment limits.

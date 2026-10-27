@@ -1,7 +1,7 @@
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+import { StripeReturnPage } from "./pages/StripeReturnPage";
 import { lazy, Suspense } from "react";
-const WalletPage = lazy(() =>
-  import("./pages/WalletPage").then((m) => ({ default: m.WalletPage })),
-);
+import { UnavailableFeaturePage } from "./pages/UnavailableFeaturePage";
 const PlansPage = lazy(() =>
   import("./pages/PlansPage").then((m) => ({ default: m.PlansPage })),
 );
@@ -23,6 +23,7 @@ const ReceiptPage = lazy(() =>
 const AccountPage = lazy(() =>
   import("./pages/AccountPage").then((m) => ({ default: m.AccountPage })),
 );
+import { HelpPage } from "./pages/HelpPage";
 import { PaymentReturnPage } from "./pages/PaymentReturnPage";
 import { useEffect, useState } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -40,11 +41,13 @@ export default function App() {
   }, []);
   return (
     <AppLayout activity={hash === "#activity"}>
-      <Suspense fallback={<p role="status">Loading experience...</p>}>
-        {hash === "#account" ? (
+      <ErrorBoundary key={hash}><Suspense fallback={<p role="status">Loading...</p>}>
+        {hash === "#help" ? (
+          <HelpPage />
+        ) : hash === "#account" ? (
           <AccountPage />
         ) : hash === "#wallet" ? (
-          <WalletPage />
+          <UnavailableFeaturePage />
         ) : hash === "#plans" ? (
           <PlansPage />
         ) : hash.startsWith("#plan=") ? (
@@ -57,6 +60,8 @@ export default function App() {
           <BalancesPage />
         ) : hash === "#receipt" ? (
           <ReceiptPage />
+        ) : hash.startsWith("#stripe-return=") ? (
+          <StripeReturnPage key={hash} hash={hash} />
         ) : hash.startsWith("#payment-return=") ? (
           <PaymentReturnPage key={hash} hash={hash} />
         ) : hash === "#activity" ? (
@@ -72,7 +77,7 @@ export default function App() {
         ) : (
           <PayTogetherPage />
         )}
-      </Suspense>
+      </Suspense></ErrorBoundary>
     </AppLayout>
   );
 }

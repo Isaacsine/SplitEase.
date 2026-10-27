@@ -93,8 +93,7 @@ export function PlansPage() {
         </Button>
       </div>
       <p className="muted small">
-        Track contributions without holding funds. Automatic debit is a preview
-        only.
+        Agree an amount. Keep track each month.
       </p>
       {error && (
         <p className="error" role="alert">

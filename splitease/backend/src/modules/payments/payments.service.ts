@@ -2,7 +2,7 @@ import { IdempotencyStore } from "../../lib/idempotency.js";
 import { MockPaymentProvider } from "./providers/MockPaymentProvider.js";
 import type { CreatePaymentInput } from "./providers/PaymentProvider.js";
 import type { PaymentRecord } from "./paymentState.js";
-import { createPaymentRepository, newPaymentId, type PaymentRepository } from "./payments.repository.js";
+import { newPaymentId, type PaymentRepository } from "./payments.repository.js";
 export class PaymentsService {
   private readonly idempotency = new IdempotencyStore<PaymentRecord>(); private readonly provider = new MockPaymentProvider();
   constructor(private readonly repository: PaymentRepository) {}

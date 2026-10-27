@@ -23,7 +23,7 @@ export function RoomLauncher() {
     <section className="group-launcher" aria-label="Shared group">
       <h3>Keep everyone together</h3>
       <p className="muted">
-        One place to choose how to contribute, track the bill and confirm cash.
+        Shares, chat and photos in one place.
       </p>
       <Button aria-label="Create group" disabled={busy} onClick={create}>
         {busy ? "Creating shared group..." : "Create shared group"}

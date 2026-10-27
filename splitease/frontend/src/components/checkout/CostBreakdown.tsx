@@ -13,7 +13,7 @@ export function CostBreakdown() {
         <span>Your share</span>
         <strong>{formatZAR(shop.participants[0]?.share || 0)}</strong>
       </div>
-      <small className="muted">No money is collected in this prototype.</small>
+      <small className="muted">Stripe test payments only. No real money is collected.</small>
     </div>
   );
 }

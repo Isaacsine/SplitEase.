@@ -1,3 +1,5 @@
+import { privateRpc } from "../../lib/privateCloud";
+import { privateLocal } from "../../lib/privateStorage";
 import { supabase } from "../../lib/supabase";
 import { readWallet, type WalletMode, type Wallet } from "./wallet.api";
 import type { PlanRef } from "../plans/plans";
@@ -11,7 +13,7 @@ export async function paymentMode(target: WalletTarget): Promise<WalletMode> {
     return target.ref.mode === "cloud" ? "cloud" : "local";
   if (target.kind === "room")
     return target.ref.mode === "cloud" ? "cloud" : "local";
-  const chosen = localStorage.getItem("splitease-wallet-choice");
+  const chosen = privateLocal.getItem("splitease-wallet-choice");
   if (chosen === "local") return "local";
   if (supabase) {
     const {
@@ -57,7 +59,7 @@ export async function payFromWallet(
     throw Error("Use the wallet that matches this contribution.");
   if (mode === "cloud") {
     if (!supabase) throw Error("Sign in to use your account wallet.");
-    const { data, error } = await supabase.rpc("wallet_pay", {
+    const { data, error } = await privateRpc("wallet_pay", {
       p_target: target.kind,
       p_token: target.kind === "payment" ? null : target.ref.key,
       p_seat: target.kind === "payment" ? null : target.ref.seat || null,
@@ -94,7 +96,7 @@ export async function payFromWallet(
       notify = "";
     if (target.kind === "plan") {
       targetStorage = "splitease-monthly-plans";
-      db = JSON.parse(localStorage.getItem(targetStorage) || "{}");
+      db = JSON.parse(privateLocal.getItem(targetStorage) || "{}");
       const p = db[target.ref.key];
       if (!p?.active) throw Error("This plan is not active.");
       const m = target.ref.seat
@@ -110,7 +112,7 @@ export async function payFromWallet(
       notify = "splitease-plans";
     } else if (target.kind === "room") {
       targetStorage = "splitease-demo-rooms-v1";
-      db = JSON.parse(localStorage.getItem(targetStorage) || "{}");
+      db = JSON.parse(privateLocal.getItem(targetStorage) || "{}");
       const r = db[target.ref.key],
         m = target.ref.seat
           ? r?.members.find((m: any) => m.seatToken === target.ref.seat)
@@ -154,17 +156,17 @@ export async function payFromWallet(
           ...wallet.entries,
         ],
       },
-      oldWallet = localStorage.getItem(storage),
-      oldTarget = targetStorage ? localStorage.getItem(targetStorage) : null;
+      oldWallet = privateLocal.getItem(storage),
+      oldTarget = targetStorage ? privateLocal.getItem(targetStorage) : null;
     try {
       if (targetStorage)
-        localStorage.setItem(targetStorage, JSON.stringify(db));
-      localStorage.setItem(storage, JSON.stringify(next));
+        privateLocal.setItem(targetStorage, JSON.stringify(db));
+      privateLocal.setItem(storage, JSON.stringify(next));
     } catch (e) {
       if (targetStorage && oldTarget !== null)
-        localStorage.setItem(targetStorage, oldTarget);
-      if (oldWallet !== null) localStorage.setItem(storage, oldWallet);
-      else localStorage.removeItem(storage);
+        privateLocal.setItem(targetStorage, oldTarget);
+      if (oldWallet !== null) privateLocal.setItem(storage, oldWallet);
+      else privateLocal.removeItem(storage);
       throw e;
     }
     if (notify) {

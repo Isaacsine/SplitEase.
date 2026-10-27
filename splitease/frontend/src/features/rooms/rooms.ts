@@ -1,3 +1,4 @@
+import { privateSession } from "../../lib/privateStorage";
 import type { ShopState } from "../shops/shops.api";
 import {
   repaymentPlan,
@@ -116,9 +117,9 @@ export function parseRoom(hash: string): RoomRef | null {
 export function rememberRoom(ref: RoomRef) {
   try {
     const refs = JSON.parse(
-      sessionStorage.getItem("splitease-room-refs") || "[]",
+      privateSession.getItem("splitease-room-refs") || "[]",
     ) as RoomRef[];
-    sessionStorage.setItem(
+    privateSession.setItem(
       "splitease-room-refs",
       JSON.stringify(
         [ref, ...refs.filter((r) => r.key !== ref.key)].slice(0, 30),
@@ -128,7 +129,7 @@ export function rememberRoom(ref: RoomRef) {
 }
 export function roomRefs(): RoomRef[] {
   try {
-    return JSON.parse(sessionStorage.getItem("splitease-room-refs") || "[]");
+    return JSON.parse(privateSession.getItem("splitease-room-refs") || "[]");
   } catch {
     return [];
   }

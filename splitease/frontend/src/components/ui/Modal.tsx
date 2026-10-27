@@ -33,11 +33,15 @@ export function Modal({
         }
       }}
     >
-      <button className="close" aria-label="Close dialog" onClick={onClose}>
-        ×
-      </button>
-      <h2>{title}</h2>
-      {children}
+      {open && (
+        <>
+          <button className="close" aria-label="Close dialog" onClick={onClose}>
+            <span aria-hidden="true">&#215;</span>
+          </button>
+          <h2>{title}</h2>
+          {children}
+        </>
+      )}
     </dialog>
   );
 }

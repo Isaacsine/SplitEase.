@@ -108,8 +108,8 @@ export function ScanToPayPage({
       <h2>{inviteMode ? "Scan to invite" : "Scan to pay"}</h2>
       <p className="muted">
         {inviteMode
-          ? "Scan a SplitEase invitation so a person or group member can review and accept it."
-          : "Scan a bank/payment QR code or a SplitEase payment request. Bank payments need a connected provider."}
+          ? "Scan a SplitEase invitation."
+          : "Scan a SplitEase QR code or upload an image."}
       </p>
       <div className="scanner">
         <video
@@ -124,7 +124,7 @@ export function ScanToPayPage({
             <span aria-hidden="true">&#9638;</span>
             <strong>Point your camera at a QR code</strong>
             <small>
-              Camera access begins only when you choose Start camera.
+              Choose Start camera when ready.
             </small>
           </div>
         )}
@@ -200,9 +200,7 @@ export function ScanToPayPage({
           ) : (
             <>
               <p>
-                This code is not a supported SplitEase request. This prototype
-                only opens SplitEase invitation QR codes. No payment has been
-                made.
+                This code is not a supported SplitEase request. Try an invitation QR.
               </p>
               <details>
                 <summary>Show scanned content</summary>
