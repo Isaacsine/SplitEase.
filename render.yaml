@@ -1,4 +1,4 @@
-﻿services:
+services:
   - type: web
     name: splitease
     runtime: static
@@ -21,9 +21,9 @@
     envVars:
       - key: CORS_ORIGIN
         sync: false
-        - key: PORT
-          value: "10000"
-        - key: SUPABASE_URL
-          sync: false
-        - key: SUPABASE_SERVICE_ROLE_KEY
-          sync: false
+      - key: PORT
+        value: "10000"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

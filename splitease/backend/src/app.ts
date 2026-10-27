@@ -30,26 +30,10 @@ export function createApp() {
   app.use("/api/payments", paymentsRoutes());
   // API routes that don't match return 404.
   app.use("/api", (_req, res) => res.status(404).json({ error: "Route not found." }));
-  // Non-API requests are for the frontend SPA. Serve index.html for the root
-  // path and for client-side routing. For static assets (JS, CSS), serve them
-  // directly from the frontend/dist directory.
-  app.use((req, res, next) => {
-    if (req.path.startsWith("/api")) return next();
-    // Serve static assets from frontend/dist. Strip leading slash from req.path
-    // to avoid path resolution issues on Windows.
-    const assetPath = req.path.replace(/^\/+/, "");
-    const assetFullPath = path.resolve(__dirname, "..", "..", "frontend", "dist", assetPath);
-    console.error("DEBUG: assetFullPath =", JSON.stringify(assetFullPath));
-    res.sendFile(assetFullPath, (err: unknown) => {
-      if (err) {
-        console.error("sendFile error:", err);
-      }
-      if (err && typeof err === "object" && (err as NodeJS.ErrnoException).code === "ENOENT") {
-        // File not found — serve index.html for client-side routing
-        res.sendFile(path.join(frontendDist, "index.html"));
-      } else {
-        next(err);
-      }
+  app.use(express.static(frontendDist));
+  app.get("/{*path}", (_req, res, next) => {
+    res.sendFile(path.join(frontendDist, "index.html"), (err) => {
+      if (err) next(err);
     });
   });
   return app;
