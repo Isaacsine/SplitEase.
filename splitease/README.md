@@ -62,3 +62,7 @@ Stokvel adds agreed payout rotations and month-end payout previews. Wallet adds 
 ## Pay from wallet
 
 Deposits need only an amount. Wallet balances can fund bills, live room shares, monthly plans and stokvel contributions after explicit confirmation. Insufficient balance leaves the direct-bank preview available without deducting from the wallet. Shared payments require migration 007 after 006. See [wallet payments](docs/wallet-payments.md). All funds and bank payments remain simulated.
+
+## Google and phone sign-in
+
+Google sign-in and phone-only passkey sign-in are available through Supabase Auth. Enable the providers and configure the callback URL and passkey relying party before testing live. See [sign-in setup](docs/sign-in.md).

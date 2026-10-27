@@ -6,6 +6,7 @@ export const supabase =
     ? createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, {
         auth: {
           detectSessionInUrl: true,
+          experimental: { passkey: true },
           persistSession: true,
           storage: authStorage,
           autoRefreshToken: true,
