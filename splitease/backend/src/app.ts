@@ -4,6 +4,7 @@ import { paymentsRoutes } from "./modules/payments/payments.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const frontendDist = path.resolve(__dirname, "..", "..", "frontend", "dist");
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
@@ -27,15 +28,29 @@ export function createApp() {
     })
   );
   app.use("/api/payments", paymentsRoutes());
-  // API routes that don't match return 404 (frontend is a separate static site).
+  // API routes that don't match return 404.
   app.use("/api", (_req, res) => res.status(404).json({ error: "Route not found." }));
-  // Non-API requests are for the frontend SPA. Serve index.html so client-side
-  // routing (e.g. React Router) works when the backend is the entry point.
+  // Non-API requests are for the frontend SPA. Serve index.html for the root
+  // path and for client-side routing. For static assets (JS, CSS), serve them
+  // directly from the frontend/dist directory.
   app.use((req, res, next) => {
     if (req.path.startsWith("/api")) return next();
-    // __dirname resolves to backend/dist; go up two levels to the repo root,
-    // then into frontend/dist, and serve index.html.
-    res.sendFile(path.join(__dirname, "..", "..", "frontend", "dist", "index.html"));
+    // Serve static assets from frontend/dist. Strip leading slash from req.path
+    // to avoid path resolution issues on Windows.
+    const assetPath = req.path.replace(/^\/+/, "");
+    const assetFullPath = path.resolve(__dirname, "..", "..", "frontend", "dist", assetPath);
+    console.error("DEBUG: assetFullPath =", JSON.stringify(assetFullPath));
+    res.sendFile(assetFullPath, (err: unknown) => {
+      if (err) {
+        console.error("sendFile error:", err);
+      }
+      if (err && typeof err === "object" && (err as NodeJS.ErrnoException).code === "ENOENT") {
+        // File not found — serve index.html for client-side routing
+        res.sendFile(path.join(frontendDist, "index.html"));
+      } else {
+        next(err);
+      }
+    });
   });
   return app;
 }
