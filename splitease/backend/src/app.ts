@@ -1,6 +1,9 @@
 import express from "express";
 import { readEnv } from "./config/env.js";
 import { paymentsRoutes } from "./modules/payments/payments.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
@@ -30,7 +33,9 @@ export function createApp() {
   // routing (e.g. React Router) works when the backend is the entry point.
   app.use((req, res, next) => {
     if (req.path.startsWith("/api")) return next();
-    res.sendFile("index.html", { root: "frontend/dist" });
+    // __dirname resolves to backend/dist; go up two levels to the repo root,
+    // then into frontend/dist, and serve index.html.
+    res.sendFile(path.join(__dirname, "..", "..", "frontend", "dist", "index.html"));
   });
   return app;
 }
