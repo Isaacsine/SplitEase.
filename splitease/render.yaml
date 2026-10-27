@@ -1,22 +1,9 @@
 services:
   - type: web
     name: splitease
-    runtime: static
-    rootDir: splitease
-    buildCommand: npm ci && npm run build
-    staticPublishPath: frontend/dist
-    envVars:
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_PUBLISHABLE_KEY
-        sync: false
-      - key: VITE_API_URL
-        sync: false
-  - type: web
-    name: splitease-api
     runtime: node
     rootDir: splitease
-    buildCommand: npm ci && npm run build --workspace backend
+    buildCommand: npm ci && npm run build --workspace backend && npm run build --workspace frontend
     startCommand: npm run start --workspace backend
     envVars:
       - key: PORT
