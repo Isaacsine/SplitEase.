@@ -1,3 +1,4 @@
+import { publicAppUrl } from "../../lib/publicLinks";
 import { privateSession } from "../../lib/privateStorage";
 import type { ShopState } from "../shops/shops.api";
 import {
@@ -95,8 +96,7 @@ export function roomMembers(shop: ShopState) {
   }));
 }
 export const roomLink = (ref: RoomRef) =>
-  location.origin +
-  location.pathname +
+  publicAppUrl() +
   "#room=" +
   ref.key +
   "&mode=" +

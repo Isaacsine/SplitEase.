@@ -1,3 +1,4 @@
+import { publicAppUrl } from "../../lib/publicLinks";
 import type { PaymentChoice, InstalmentCount } from "../payments/paymentPlans";
 import type { Participant, ShopState } from "../shops/shops.api";
 import { supabase } from "../../lib/supabase";
@@ -20,12 +21,7 @@ export function inviteLink(shop: ShopState, p: Participant) {
     share: p.share,
     paymentChoice: "now",
   };
-  return (
-    location.origin +
-    location.pathname +
-    "#join=" +
-    encodeURIComponent(JSON.stringify(data))
-  );
+  return publicAppUrl() + "#join=" + encodeURIComponent(JSON.stringify(data));
 }
 export function parseInvite(hash: string): Invite | null {
   try {
@@ -90,10 +86,7 @@ export async function publishInvite(
   if (existing.error)
     throw Error("Could not check existing invitations. Please try again.");
   if (existing.data)
-    return withPreference(
-      location.origin + location.pathname + "#invite=" + existing.data.token,
-      p,
-    );
+    return withPreference(publicAppUrl() + "#invite=" + existing.data.token, p);
   const { data, error } = await supabase
     .from("payment_requests")
     .insert({
@@ -111,10 +104,7 @@ export async function publishInvite(
     throw Error(
       "Could not save the invitation. Check your Supabase configuration and migration.",
     );
-  return withPreference(
-    location.origin + location.pathname + "#invite=" + data.token,
-    p,
-  );
+  return withPreference(publicAppUrl() + "#invite=" + data.token, p);
 }
 export async function readInvite(rawToken: string): Promise<Invite> {
   const [token, ...rest] = rawToken.split("&");

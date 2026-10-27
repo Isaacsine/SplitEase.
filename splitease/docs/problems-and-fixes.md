@@ -194,3 +194,16 @@ Browser tests use a separate test server, dummy Supabase configuration and mocke
 8. Validate deployed webhook delivery and obtain an independent review before enabling live-money flows.
 
 Related documents: [Privacy readiness](privacy-readiness.md), [Stripe sandbox setup](stripe-sandbox.md), [Test payment rollout](test-payment-rollout.md), and [Review notes](review-notes.md). The historical review/rollout notes describe earlier stages; this document records the later test-data cleanup and validation totals.
+
+## 10. QR codes opened a local address on external phones
+
+Shared links previously always used the browser's current address. QR codes generated on localhost therefore could not reach the app from another phone.
+
+1. Added a public link helper using `VITE_PUBLIC_APP_URL`, with the current app URL as the fallback.
+2. Updated payment invitations, tracked invitations, group links and plan links to use that helper.
+3. Restricted configured destinations to HTTPS, with HTTP allowed for loopback development.
+4. Kept in-app scanning restricted to the current app or its configured public address.
+5. Added configuration examples and [deployment instructions](qr-links.md).
+6. Passed the frontend production build and 16 focused browser tests covering links, invitations and QR scanning.
+
+The real deployed domain still needs to be entered in the frontend build environment, followed by a rebuild. Existing saved QR images must be regenerated. No hosting deployment was performed as part of this change.

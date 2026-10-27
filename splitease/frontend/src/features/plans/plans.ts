@@ -1,3 +1,4 @@
+import { publicAppUrl } from "../../lib/publicLinks";
 import { privateSession } from "../../lib/privateStorage";
 import { todayInSouthAfrica } from "../payments/paymentPlans";
 export interface PlanRef {
@@ -140,8 +141,7 @@ export function rotationMonths(p: Plan) {
 }
 export function planLink(r: PlanRef) {
   return (
-    location.origin +
-    location.pathname +
+    publicAppUrl() +
     "#plan=" +
     r.key +
     "&mode=" +
